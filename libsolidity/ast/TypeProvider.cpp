@@ -154,6 +154,7 @@ array<unique_ptr<MagicType>, 4> const TypeProvider::m_magics{{
 	// MetaType is stored separately
 }};
 
+
 inline void clearCache(Type const& type)
 {
 	type.clearCache();
