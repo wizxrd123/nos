@@ -967,6 +967,7 @@ ASTPointer<UsingForDirective> Parser::parseUsingDirective()
 	expectToken(Token::Using);
 
 	vector<ASTPointer<IdentifierPath>> functions;
+	vector<optional<Token>> operators;
 	bool const usesBraces = m_scanner->currentToken() == Token::LBrace;
 	if (usesBraces)
 	{
@@ -974,12 +975,32 @@ ASTPointer<UsingForDirective> Parser::parseUsingDirective()
 		{
 			advance();
 			functions.emplace_back(parseIdentifierPath());
+			optional<Token> operator_;
+			if (m_scanner->currentToken() == Token::As)
+			{
+				advance();
+				Token operator_ = m_scanner->currentToken();
+				if (
+					// TODO restrict more?
+					!TokenTraits::isBinaryOp(operator_) &&
+					!TokenTraits::isUnaryOp(operator_) &&
+					!TokenTraits::isCompareOp(operator_)
+				)
+					parserError(1885_error, "Expected unary, binary or comparison operator.");
+				operators.emplace_back(operator_);
+				advance();
+			}
+			else
+				operators.emplace_back();
 		}
 		while (m_scanner->currentToken() == Token::Comma);
 		expectToken(Token::RBrace);
 	}
 	else
+	{
 		functions.emplace_back(parseIdentifierPath());
+		operators.emplace_back();
+	}
 
 	ASTPointer<TypeName> typeName;
 	expectToken(Token::For);
@@ -989,7 +1010,7 @@ ASTPointer<UsingForDirective> Parser::parseUsingDirective()
 		typeName = parseTypeName();
 	nodeFactory.markEndPosition();
 	expectToken(Token::Semicolon);
-	return nodeFactory.createNode<UsingForDirective>(move(functions), usesBraces, typeName);
+	return nodeFactory.createNode<UsingForDirective>(move(functions), move(operators), usesBraces, typeName);
 }
 
 ASTPointer<ModifierInvocation> Parser::parseModifierInvocation()

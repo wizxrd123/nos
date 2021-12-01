@@ -384,6 +384,13 @@ void SyntaxChecker::endVisit(ContractDefinition const&)
 
 bool SyntaxChecker::visit(UsingForDirective const& _usingFor)
 {
+	if (!_usingFor.usesBraces())
+		solAssert(
+			_usingFor.functionsAndOperators().size() == 1 &&
+			!std::get<1>(_usingFor.functionsAndOperators().front())
+		);
+	// TODO check validity of operator tokens
+
 	if (!m_currentContractKind && !_usingFor.typeName())
 		m_errorReporter.syntaxError(
 			8118_error,
