@@ -2,6 +2,7 @@
 
 Language Features:
  * General: Allow annotating inline assembly as memory-safe to allow optimizations and stack limit evasion that rely on respecting Solidity's memory model.
+ * General: ``using M for Type;`` is allowed at file level and ``M`` can now also be a brace-enclosed list of free functions or library functions.
 
 
 Compiler Features:
@@ -53,7 +54,6 @@ Build System:
 ### 0.8.11 (2021-12-20)
 
 Language Features:
- * ``using M for Type;`` is allowed at file level and ``M`` can be a brace-enclosed list of functions, ``*`` or a module name.
  * General: New builtin function ``abi.encodeCall(functionPointer, (arg1, arg2, ...))`` that type-checks the arguments and returns the ABI-encoded function call data.
 
 
