@@ -3595,16 +3595,17 @@ void TypeChecker::endVisit(UsingForDirective const& _usingFor)
 		solAssert(normalizedType);
 	}
 
-	for (ASTPointer<IdentifierPath> const& path: _usingFor.allFunctions())
+	for (ASTPointer<IdentifierPath> const& path: _usingFor.functionsOrLibrary())
 	{
 		solAssert(path->annotation().referencedDeclaration);
-		// No type checking if it is a module.
+		// No type checking if it is a library.
 		FunctionDefinition const* functionDefinition =
 			dynamic_cast<FunctionDefinition const*>(path->annotation().referencedDeclaration);
 		if (!functionDefinition)
 			continue;
 
-		solAssert(functionDefinition->type(), "");
+		solAssert(normalizedType, "Combined function list with `*` for the type.");
+		solAssert(functionDefinition->type());
 
 		if (functionDefinition->parameters().empty())
 			m_errorReporter.fatalTypeError(
@@ -3617,16 +3618,22 @@ void TypeChecker::endVisit(UsingForDirective const& _usingFor)
 
 		FunctionType const* functionType = dynamic_cast<FunctionType const&>(*functionDefinition->type()).asBoundFunction();
 		solAssert(functionType && functionType->selfType(), "");
-		if (normalizedType && !normalizedType->isImplicitlyConvertibleTo(
-				*TypeProvider::withLocationIfReference(DataLocation::Storage, functionType->selfType())
-		))
+		BoolResult result = normalizedType->isImplicitlyConvertibleTo(
+			*TypeProvider::withLocationIfReference(DataLocation::Storage, functionType->selfType())
+		);
+		if (!result)
 			m_errorReporter.typeError(
 				3100_error,
 				path->location(),
 				"The function \"" + functionDefinition->name() + "\" "+
 				"cannot be bound to the type \"" + _usingFor.typeName()->annotation().type->toString() +
 				"\" because the type cannot be implicitly converted to the first argument" +
-				" of the function (\"" + functionType->selfType()->toString() + "\")."
+				" of the function (\"" + functionType->selfType()->toString() + "\")" +
+				(
+					result.message().empty() ?
+					"." :
+					": " +  result.message()
+				)
 			);
 	}
 }

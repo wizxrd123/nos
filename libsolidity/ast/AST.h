@@ -44,7 +44,6 @@
 #include <optional>
 #include <string>
 #include <utility>
-#include <variant>
 #include <vector>
 
 namespace solidity::yul
@@ -633,38 +632,28 @@ private:
 /**
  * Using for directive:
  *
- * 1. `using LibraryName for T` will attach any function from the library `LibraryName` to the type
- *     `T` if its first parameter matches the type `T`.
- * 2. `using ModuleName for uint` will attach any free functions from the module `ModuleName` to the
- *    type `T` if its the first parameter matches the type `T`.
- * 3. `using f for T` and `using {f1, f2, ..., fn} for T` attaches the functions `f` and `f1`, ...,
- *     `fn`, respectively to `T`; it is necessary that all of these functions have their first
- *     parameter matching the type `T`.
- * 4. `using <above-cases> for *` attaches to any matching type.
- * 5. `using * for T` will attach any free function in the current source unit to the type `T` if
- *     its first parameter matches the type `T`.
- * 6. `using * for *` combines 4 and 5.
+ * 1. `using LibraryName for T` attaches all functions from the library `LibraryName` to the type `T`
+ * 2. `using LibraryName for *` attaches to all types.
+ * 3. `using {f1, f2, ..., fn} for T` attaches the functions `f1`, `f2`, ...,
+ *     `fn`, respectively to `T`.
  *
- * Note: here "matches with type" means an equivalence up to an implicit conversion.
+ * For version 3, T has to be implicitly convertible to the first parameter type of
+ * all functions, and this is checked at the point of the using statement. For versions 1 and
+ * 2, this check is only done when a function is called.
  */
 class UsingForDirective: public ASTNode
 {
 public:
 	struct Asterisk {};
 
-	using Functions = std::variant<
-		ASTPointer<IdentifierPath>, ///< using L for T;
-		std::vector<ASTPointer<IdentifierPath>>, ///< using {f1, f2} for T;
-		Asterisk ///< using * for T;
-	>;
-
 	UsingForDirective(
 		int64_t _id,
 		SourceLocation const& _location,
-		Functions _lhs,
+		std::vector<ASTPointer<IdentifierPath>> _functions,
+		bool _usesBraces,
 		ASTPointer<TypeName> _typeName
 	):
-		ASTNode(_id, _location), m_functions(_lhs), m_typeName(std::move(_typeName))
+		ASTNode(_id, _location), m_functions(_functions), m_usesBraces(_usesBraces), m_typeName(std::move(_typeName))
 	{
 	}
 
@@ -674,15 +663,14 @@ public:
 	/// @returns the type name the library is attached to, null for `*`.
 	TypeName const* typeName() const { return m_typeName.get(); }
 
-	Functions const& functions() const { return m_functions; }
-
-	/// @returns a list of all identifiers on the left hand side, regardless
-	/// of whether they are inside `{}` or not.
-	/// Returns an empty list for asterisk.
-	std::vector<ASTPointer<IdentifierPath>> allFunctions() const;
+	/// @returns a list of functions or the single library.
+	std::vector<ASTPointer<IdentifierPath>> const& functionsOrLibrary() const { return m_functions; }
+	bool usesBraces() const { return m_usesBraces; }
 
 private:
-	Functions m_functions;
+	/// Either the single library or a list of functions.
+	std::vector<ASTPointer<IdentifierPath>> m_functions;
+	bool m_usesBraces;
 	ASTPointer<TypeName> m_typeName;
 };
 

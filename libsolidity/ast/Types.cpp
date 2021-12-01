@@ -332,17 +332,14 @@ MemberList::MemberMap Type::boundFunctions(Type const& _type, ASTNode const& _sc
 {
 	vector<UsingForDirective const*> usingForDirectives;
 	SourceUnit const* sourceUnit = dynamic_cast<SourceUnit const*>(&_scope);
-	if (sourceUnit)
-		usingForDirectives += ASTNode::filteredNodes<UsingForDirective>(sourceUnit->nodes());
-	else if (auto const* contract = dynamic_cast<ContractDefinition const*>(&_scope))
+	if (auto const* contract = dynamic_cast<ContractDefinition const*>(&_scope))
 	{
 		sourceUnit = &contract->sourceUnit();
-		usingForDirectives +=
-			contract->usingForDirectives() +
-			ASTNode::filteredNodes<UsingForDirective>(contract->sourceUnit().nodes());
+		usingForDirectives += contract->usingForDirectives();
 	}
 	else
-		solAssert(false, "");
+		solAssert(sourceUnit, "");
+	usingForDirectives += ASTNode::filteredNodes<UsingForDirective>(sourceUnit->nodes());
 
 	// Normalise data location of type.
 	DataLocation typeLocation = DataLocation::Storage;
@@ -368,19 +365,6 @@ MemberList::MemberMap Type::boundFunctions(Type const& _type, ASTNode const& _sc
 				members.emplace_back(&_function, asBoundFunction, *_name);
 	};
 
-	auto addFreeFunctionsFromSourceUnit = [&](SourceUnit const& _sourceUnit)
-	{
-		for (auto&& [name, declarations]: *_sourceUnit.annotation().exportedSymbols)
-			for (Declaration const* declaration: declarations)
-			{
-				if (auto function = dynamic_cast<FunctionDefinition const*>(declaration))
-				{
-					solAssert(function && function->isFree() && function->type(), "");
-					addFunction(*function, name);
-				}
-			}
-	};
-
 	for (UsingForDirective const* ufd: usingForDirectives)
 	{
 		// Convert both types to pointers for comparison to see if the `using for`
@@ -398,54 +382,28 @@ MemberList::MemberMap Type::boundFunctions(Type const& _type, ASTNode const& _sc
 		)
 			continue;
 
-		std::visit(util::GenericVisitor{
-			[&](ASTPointer<IdentifierPath> const& _libraryOrFunctionOrModule)
-			{
-				Declaration const* decl = _libraryOrFunctionOrModule->annotation().referencedDeclaration;
+		for (auto const& pathPointer: ufd->functionsOrLibrary())
+		{
+			solAssert(pathPointer);
+			Declaration const* declaration = pathPointer->annotation().referencedDeclaration;
+			solAssert(declaration);
 
-				solAssert(decl);
-				if (auto library = dynamic_cast<ContractDefinition const*>(decl))
-				{
-					solAssert(library->isLibrary());
-					for (FunctionDefinition const* function: library->definedFunctions())
-					{
-						if (!function->isOrdinary() || !function->isVisibleAsLibraryMember() || function->parameters().empty())
-							continue;
-						addFunction(*function);
-					}
-				}
-				else if (auto function = dynamic_cast<FunctionDefinition const*>(decl))
-					addFunction(*function, _libraryOrFunctionOrModule->path().back());
-				else if (auto module = dynamic_cast<ImportDirective const*>(decl))
-				{
-					SourceUnit const* sourceUnit = module->annotation().sourceUnit;
-					solAssert(sourceUnit);
-					addFreeFunctionsFromSourceUnit(*sourceUnit);
-				}
-				else
-					solAssert(false);
-			},
-			[&](vector<ASTPointer<IdentifierPath>> const& _functionList)
+			if (ContractDefinition const* library = dynamic_cast<ContractDefinition const*>(declaration))
 			{
-				for (auto const& pathPointer: _functionList)
+				solAssert(library->isLibrary());
+				for (FunctionDefinition const* function: library->definedFunctions())
 				{
-					solAssert(
-						pathPointer &&
-						pathPointer->annotation().referencedDeclaration
-					);
-					addFunction(
-						dynamic_cast<FunctionDefinition const&>(
-							*pathPointer->annotation().referencedDeclaration
-						),
-						pathPointer->path().back()
-					);
+					if (!function->isOrdinary() || !function->isVisibleAsLibraryMember() || function->parameters().empty())
+						continue;
+					addFunction(*function);
 				}
-			},
-			[&](UsingForDirective::Asterisk const&)
-			{
-				addFreeFunctionsFromSourceUnit(*sourceUnit);
 			}
-		}, ufd->functions());
+			else
+				addFunction(
+					dynamic_cast<FunctionDefinition const&>(*declaration),
+					pathPointer->path().back()
+				);
+		}
 	}
 
 	return members;

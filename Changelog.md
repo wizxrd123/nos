@@ -3,6 +3,7 @@
 Language Features:
  * General: Support ``ContractName.functionName`` for ``abi.encodeCall``, in addition to external function pointers.
  * General: Add equality-comparison operators for external function types.
+ * General: ``using M for Type;`` is allowed at file level and ``M`` can now also be a brace-enclosed list of free functions or library functions.
 
 
 Compiler Features:
@@ -32,7 +33,6 @@ Solc-Js:
 ### 0.8.11 (2021-12-20)
 
 Language Features:
- * ``using M for Type;`` is allowed at file level and ``M`` can be a brace-enclosed list of functions, ``*`` or a module name.
  * General: New builtin function ``abi.encodeCall(functionPointer, (arg1, arg2, ...))`` that type-checks the arguments and returns the ABI-encoded function call data.
 
 

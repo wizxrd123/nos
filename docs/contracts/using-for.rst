@@ -11,36 +11,36 @@ functions (``A``) as member functions to any type (``B``).
 These functions will receive the object they are called on
 as their first parameter (like the ``self`` variable in Python).
 
+It is valid either at file level or inside a contract,
+at contract level.
+
 The first part, ``A``, can be one of:
 
-- a list of file-level functions (``using {f, g, h} for uint;``) -
+- a list of file-level or library functions (``using {f, g, h, L.t} for uint;``) -
   only those functions will be attached to the type.
-- the name of a module (``import "module.sol" as M; using M for uint;``) -
-  all file-level functions inside the given module are attached to the type,
-  even if the functions are imported.
 - the name of a library (``using L for uint;``) -
   all functions (both public and internal ones) of the library are attached to the type
-- the asterisk (``using * for uint;``) -
-  all file-level functions in the current module are attached.
 
-The directive can be used either inside a contract or at file level,
-the last version (``using * for T;``) can only be used at file level.
+At file level, the second part, ``B``, has to be an explicit type (without data location specifier).
+Inside contracts, you can also use ``using L for *;``,
+which has the effect that all functions of the library ``L``
+are attached to *all* types.
 
-Inside contracts, you can also use ``using A for *;``,
-which has the effect that the functions are attached to *all* types.
-
-Unless you specify the functions explicitly, *all* functions in the
-module or library are attached,
+If you specify a library, *all* functions in the library are attached,
 even those where the type of the first parameter does not
 match the type of the object. The type is checked at the
 point the function is called and function overload
 resolution is performed.
 
+If you use a list of functions (``using {f, g, h, L.t} for uint;``),
+then the type (``uint``) has to be implicitly convertible to the
+first parameter of each of these functions. This mean the check is
+performed even if none of these functions are called.
+
 The ``using A for B;`` directive is active only within the current
-scope (either the contract or the current module),
+scope (either the contract or the current module/source unit),
 including within all of its functions, and has no effect
-outside of the contract or module in which it is used. The directive
-may only be used inside a contract, not inside any of its functions.
+outside of the contract or module in which it is used.
 
 Let us rewrite the set example from the
 :ref:`libraries` in this way, using file-level functions
