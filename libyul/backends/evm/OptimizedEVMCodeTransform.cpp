@@ -204,6 +204,9 @@ OptimizedEVMCodeTransform::OptimizedEVMCodeTransform(
 
 void OptimizedEVMCodeTransform::assertLayoutCompatibility(Stack const& _currentStack, Stack const& _desiredStack)
 {
+/*	if (_currentStack.size() != _desiredStack.size())
+		std::cout << "AssertLayoutCompatibility: " << stackToString(_currentStack) << " <=> " << stackToString(_desiredStack) << std::endl;
+		*/
 	yulAssert(_currentStack.size() == _desiredStack.size(), "");
 	for (auto&& [currentSlot, desiredSlot]: ranges::zip_view(_currentStack, _desiredStack))
 		yulAssert(holds_alternative<JunkSlot>(desiredSlot) || currentSlot == desiredSlot, "");
@@ -367,6 +370,7 @@ void OptimizedEVMCodeTransform::operator()(CFG::BasicBlock const& _block)
 	auto const& blockInfo = m_stackLayout.blockInfos.at(&_block);
 
 	// Assert that the stack is valid for entering the block.
+	//std::cout << "Assert entry compatibility" << std::endl;
 	assertLayoutCompatibility(m_stack, blockInfo.entryLayout);
 	m_stack = blockInfo.entryLayout; // Might set some slots to junk, if not required by the block.
 	yulAssert(static_cast<int>(m_stack.size()) == m_assembly.stackHeight(), "");
@@ -384,6 +388,7 @@ void OptimizedEVMCodeTransform::operator()(CFG::BasicBlock const& _block)
 		yulAssert(static_cast<int>(m_stack.size()) == m_assembly.stackHeight(), "");
 		yulAssert(m_stack.size() >= operation.input.size(), "");
 		size_t baseHeight = m_stack.size() - operation.input.size();
+		//std::cout << "Assert first operation compatibility" << std::endl;
 		assertLayoutCompatibility(
 			m_stack | ranges::views::take_last(operation.input.size()) | ranges::to<Stack>,
 			operation.input
@@ -396,6 +401,7 @@ void OptimizedEVMCodeTransform::operator()(CFG::BasicBlock const& _block)
 		yulAssert(static_cast<int>(m_stack.size()) == m_assembly.stackHeight(), "");
 		yulAssert(m_stack.size() == baseHeight + operation.output.size(), "");
 		yulAssert(m_stack.size() >= operation.output.size(), "");
+		//std::cout << "Assert output compatibility" << std::endl;
 		assertLayoutCompatibility(
 			m_stack | ranges::views::take_last(operation.output.size()) | ranges::to<Stack>,
 			operation.output
@@ -453,7 +459,9 @@ void OptimizedEVMCodeTransform::operator()(CFG::BasicBlock const& _block)
 			m_stack.pop_back();
 
 			// Assert that we have a valid stack for both jump targets.
+			//std::cout << "Assert nonzero jump target compatibility" << std::endl;
 			assertLayoutCompatibility(m_stack, m_stackLayout.blockInfos.at(_conditionalJump.nonZero).entryLayout);
+			//std::cout << "Assert zero jump target compatibility" << std::endl;
 			assertLayoutCompatibility(m_stack, m_stackLayout.blockInfos.at(_conditionalJump.zero).entryLayout);
 
 			{

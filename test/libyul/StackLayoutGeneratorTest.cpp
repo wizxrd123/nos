@@ -108,7 +108,20 @@ public:
 private:
 	void printBlock(CFG::BasicBlock const& _block)
 	{
-		m_stream << "Block" << getBlockId(_block) << " [label=\"\\\n";
+		const char* color = [&](){
+			int color = 0;
+			if (_block.isCutEdgeTarget)
+				color += 1;
+			if (_block.needsCleanStack)
+				color += 2;
+			return std::map<int, const char*>{
+				{0, "black"},
+				{1, "red"},
+				{2, "green"},
+				{3, "yellow"}
+			}.at(color);
+		}();
+		m_stream << "Block" << getBlockId(_block) << " [color=" << color << ",label=\"\\\n";
 
 		// Verify that the entries of this block exit into this block.
 		for (auto const& entry: _block.entries)
