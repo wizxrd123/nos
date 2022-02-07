@@ -5,11 +5,12 @@ function id(uint x) pure returns (uint) {
 function zero(uint) pure returns (uint) {
     return 0;
 }
-
+using {id} for uint;
 contract C {
-    using {id, zero} for uint;
+    using {zero} for uint;
 
     function g(uint z) pure external {
         z.zero();
+        z.id();
     }
 }

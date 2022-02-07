@@ -411,6 +411,12 @@ bool SyntaxChecker::visit(UsingForDirective const& _usingFor)
 			_usingFor.location(),
 			"The type has to be specified explicitly at file level (cannot use '*')."
 		);
+	else if (_usingFor.usesBraces() && !_usingFor.typeName())
+		m_errorReporter.syntaxError(
+			3349_error,
+			_usingFor.location(),
+			"The type has to be specified explicitly when attaching specific functions."
+		);
 	if (m_currentContractKind == ContractKind::Interface)
 		m_errorReporter.syntaxError(
 			9088_error,
