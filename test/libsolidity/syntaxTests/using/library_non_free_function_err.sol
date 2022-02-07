@@ -1,14 +1,13 @@
 library L {
-    function id(uint x) internal returns(uint) {
+    function id(uint x) internal pure returns(uint) {
         return x;
     }
 }
 
 contract C {
-    using L.id for uint;
-    function f(uint x) external {
+    using {L.id} for uint;
+    function f(uint x) external pure {
         x.id();
     }
 }
 // ----
-// TypeError 4167: (111-115): Only free functions can be bound to a type in a "using" statement

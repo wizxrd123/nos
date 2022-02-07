@@ -16,4 +16,4 @@ contract C {
     }
 }
 // ----
-// SyntaxError 1308: (150-164): The statement 'using *...' is only allowed at file level.
+// ParserError 2314: (156-157): Expected identifier but got '*'

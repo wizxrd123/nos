@@ -7,7 +7,7 @@ function id(uint x) pure returns (uint) {
 import "A" as M;
 
 contract C {
-    using M.id for uint;
+    using {M.id} for uint;
 	function f(uint x) public pure returns (uint) {
         return x.id();
     }

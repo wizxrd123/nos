@@ -645,8 +645,6 @@ private:
 class UsingForDirective: public ASTNode
 {
 public:
-	struct Asterisk {};
-
 	UsingForDirective(
 		int64_t _id,
 		SourceLocation const& _location,
