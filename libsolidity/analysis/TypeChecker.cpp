@@ -3604,7 +3604,11 @@ void TypeChecker::endVisit(UsingForDirective const& _usingFor)
 		if (!functionDefinition)
 			continue;
 
-		solAssert(normalizedType, "Combined function list with `*` for the type.");
+		if (!normalizedType)
+		{
+			solAssert(m_errorReporter.hasErrors());
+			continue;
+		}
 		solAssert(functionDefinition->type());
 
 		if (functionDefinition->parameters().empty())

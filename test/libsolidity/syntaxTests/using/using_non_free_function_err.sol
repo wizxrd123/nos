@@ -1,12 +1,8 @@
 contract C {
-    using {f, h} for uint;
+    using {f, g} for uint;
 
-    function f(uint) internal {
-    }
-    function g(uint) external {
-    }
-    function h(uint) internal {
-    }
+    function f(uint) internal { }
+    function g(uint) public { }
 }
 // ----
 // TypeError 4167: (24-25): Only free functions and library functions can be bound to a type in a "using" statement
