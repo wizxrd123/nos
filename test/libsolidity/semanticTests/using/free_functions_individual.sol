@@ -7,8 +7,8 @@ function zero(uint) pure returns (uint) {
 }
 
 contract C {
-    using id for uint;
-    using zero for uint;
+    using {id} for uint;
+    using {zero} for uint;
 
     function f(uint z) pure external returns(uint) {
         return z.id();

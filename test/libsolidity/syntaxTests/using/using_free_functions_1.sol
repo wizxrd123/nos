@@ -1,11 +1,11 @@
-function id(uint x) pure returns (uint) {
+function iden(uint x) pure returns (uint) {
     return x;
 }
 
 contract C {
-    using id for uint;
+    using { iden } for uint;
 
     function g(uint z) pure external {
-        z.id();
+        z.iden();
     }
 }

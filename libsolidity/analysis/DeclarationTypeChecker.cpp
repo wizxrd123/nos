@@ -455,7 +455,7 @@ bool DeclarationTypeChecker::visit(UsingForDirective const& _usingFor)
 	if (_usingFor.usesBraces())
 	{
 		for (ASTPointer<IdentifierPath> const& function: _usingFor.functionsOrLibrary())
-			if (auto functionDefinition = dynamic_cast<FunctionDefinition const*>(function.get()))
+			if (auto functionDefinition = dynamic_cast<FunctionDefinition const*>(function->annotation().referencedDeclaration))
 			{
 				if (!functionDefinition->isFree() && !(
 					dynamic_cast<ContractDefinition const*>(functionDefinition->scope()) &&
