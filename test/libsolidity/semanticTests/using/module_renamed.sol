@@ -10,15 +10,16 @@ function g(uint x) pure returns (uint) {
 import {f as g, g as f} from "A";
 
 ==== Source: C ====
-import "B" as M;
-
-using M for uint;
-
 contract C {
 	function test(uint x, uint y) public pure returns (uint, uint) {
         return (x.f(), y.g());
     }
 }
+
+using {M.g, M.f} for uint;
+
+import "B" as M;
+
 // ====
 // compileViaYul: also
 // ----

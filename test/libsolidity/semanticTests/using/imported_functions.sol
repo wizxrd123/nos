@@ -5,8 +5,8 @@ function inc(uint x) pure returns (uint) {
 
 ==== Source: B ====
 import {inc as f} from "A";
-import "A";
-using * for uint;
+import "A" as A;
+using {A.inc, f} for uint;
 contract C {
 	function f(uint x) public returns (uint) {
         return x.f() + x.inc();
