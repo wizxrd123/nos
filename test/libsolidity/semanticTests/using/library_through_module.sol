@@ -12,8 +12,6 @@ library L {
 }
 
 ==== Source: B ====
-import "A" as M;
-
 contract C {
     using M.L for uint;
 	function f(uint x) public pure returns (uint) {
@@ -23,6 +21,9 @@ contract C {
         return x.one_ext();
     }
 }
+
+import "A" as M;
+
 // ====
 // compileViaYul: also
 // ----

@@ -1,14 +1,7 @@
-function id(uint x) pure returns (uint) {
-    return x;
-}
-
-function zero(uint) pure returns (uint) {
-    return 0;
-}
+using {zero} for uint;
 
 contract C {
     using {id} for uint;
-    using {zero} for uint;
 
     function f(uint z) pure external returns(uint) {
         return z.id();
@@ -18,6 +11,16 @@ contract C {
         return z.zero();
     }
 }
+
+function id(uint x) pure returns (uint) {
+    return x;
+}
+
+function zero(uint) pure returns (uint) {
+    return 0;
+}
+
+
 // ====
 // compileViaYul: also
 // ----
