@@ -49,7 +49,7 @@ instead of library functions.
 .. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity ^0.8.11;
+    pragma solidity ^0.8.12;
 
     struct Data { mapping(uint => bool) flags; }
     // Now we attach functions to the type.
@@ -106,7 +106,7 @@ In this example, we will use a library.
 .. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.6.8 <0.9.0;
+    pragma solidity ^0.8.12;
 
     library Search {
         function indexOf(uint[] storage self, uint value)
