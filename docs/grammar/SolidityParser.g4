@@ -12,6 +12,7 @@ options { tokenVocab=SolidityLexer; }
 sourceUnit: (
 	pragmaDirective
 	| importDirective
+	| usingDirective
 	| contractDefinition
 	| interfaceDefinition
 	| libraryDefinition
