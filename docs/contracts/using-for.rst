@@ -52,12 +52,13 @@ instead of library functions.
     pragma solidity ^0.8.11;
 
     struct Data { mapping(uint => bool) flags; }
-    // Here, we attach functions to the type.
-    // This is valid in all of the module.
+    // Now we attach functions to the type.
+    // This is valid in the rest of the module.
     // If you import the module, you have to
     // repeat the statement there, potentially as
     //   import "flags.sol" as Flags;
-    //   using Flags for Flags.Data;
+    //   using {Flags.insert, Flags.remove, Flags.contains}
+    //     for Flags.Data;
     using {insert, remove, contains} for Data;
 
     function insert(Data storage self, uint value)
@@ -99,7 +100,8 @@ instead of library functions.
         }
     }
 
-It is also possible to extend elementary types in that way:
+It is also possible to extend elementary types in that way.
+In this example, we will use a library.
 
 .. code-block:: solidity
 
@@ -117,9 +119,9 @@ It is also possible to extend elementary types in that way:
             return type(uint).max;
         }
     }
+    using Search for uint[];
 
     contract C {
-        using Search for uint[];
         uint[] data;
 
         function append(uint value) public {
