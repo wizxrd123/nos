@@ -3627,40 +3627,49 @@ void TypeChecker::endVisit(Literal const& _literal)
 
 void TypeChecker::endVisit(UsingForDirective const& _usingFor)
 {
-	Type const* normalizedType = nullptr;
-	if (TypeName const* typeName = _usingFor.typeName())
+	if (!_usingFor.usesBraces())
 	{
-		solAssert(typeName->annotation().type);
-		normalizedType = TypeProvider::withLocationIfReference(DataLocation::Storage, typeName->annotation().type);
-		solAssert(normalizedType);
+		solAssert(_usingFor.functionsOrLibrary().size() == 1);
+		ContractDefinition const* library = dynamic_cast<ContractDefinition const*>(
+				_usingFor.functionsOrLibrary().front()->annotation().referencedDeclaration
+		);
+		solAssert(library && library->isLibrary());
+		// No type checking for libraries
+		return;
 	}
+
+	if (!_usingFor.typeName())
+	{
+		solAssert(m_errorReporter.hasErrors());
+		return;
+	}
+
+	solAssert(_usingFor.typeName()->annotation().type);
+	Type const* normalizedType = TypeProvider::withLocationIfReference(
+		DataLocation::Storage,
+		_usingFor.typeName()->annotation().type
+	);
+	solAssert(normalizedType);
 
 	for (ASTPointer<IdentifierPath> const& path: _usingFor.functionsOrLibrary())
 	{
 		solAssert(path->annotation().referencedDeclaration);
 		// No type checking if it is a library.
-		FunctionDefinition const* functionDefinition =
-			dynamic_cast<FunctionDefinition const*>(path->annotation().referencedDeclaration);
-		if (!functionDefinition)
-			continue;
+		FunctionDefinition const& functionDefinition =
+			dynamic_cast<FunctionDefinition const&>(*path->annotation().referencedDeclaration);
 
-		if (!normalizedType)
-		{
-			solAssert(m_errorReporter.hasErrors());
-			continue;
-		}
-		solAssert(functionDefinition->type());
+		solAssert(functionDefinition.type());
 
-		if (functionDefinition->parameters().empty())
+		if (functionDefinition.parameters().empty())
 			m_errorReporter.fatalTypeError(
 				4731_error,
 				path->location(),
-				"The function \"" + functionDefinition->name() + "\" " +
+				"The function \"" + joinHumanReadable(path->path(), ".") + "\" " +
 				"does not have any parameters, and therefore cannot be bound to the type \"" +
 				(normalizedType ? normalizedType->toString(true) : "*") + "\"."
 			);
 
-		FunctionType const* functionType = dynamic_cast<FunctionType const&>(*functionDefinition->type()).asBoundFunction();
+		FunctionType const* functionType = dynamic_cast<FunctionType const&>(*functionDefinition.type()).asBoundFunction();
 		solAssert(functionType && functionType->selfType(), "");
 		BoolResult result = normalizedType->isImplicitlyConvertibleTo(
 			*TypeProvider::withLocationIfReference(DataLocation::Storage, functionType->selfType())
@@ -3669,7 +3678,7 @@ void TypeChecker::endVisit(UsingForDirective const& _usingFor)
 			m_errorReporter.typeError(
 				3100_error,
 				path->location(),
-				"The function \"" + functionDefinition->name() + "\" "+
+				"The function \"" + joinHumanReadable(path->path(), ".") + "\" "+
 				"cannot be bound to the type \"" + _usingFor.typeName()->annotation().type->toString() +
 				"\" because the type cannot be implicitly converted to the first argument" +
 				" of the function (\"" + functionType->selfType()->toString() + "\")" +
