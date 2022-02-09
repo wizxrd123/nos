@@ -34,7 +34,7 @@ resolution is performed.
 
 If you use a list of functions (``using {f, g, h, L.t} for uint;``),
 then the type (``uint``) has to be implicitly convertible to the
-first parameter of each of these functions. This mean the check is
+first parameter of each of these functions. This check is
 performed even if none of these functions are called.
 
 The ``using A for B;`` directive is active only within the current
@@ -43,7 +43,7 @@ including within all of its functions, and has no effect
 outside of the contract or module in which it is used.
 
 Let us rewrite the set example from the
-:ref:`libraries` in this way, using file-level functions
+:ref:`libraries` section in this way, using file-level functions
 instead of library functions.
 
 .. code-block:: solidity
@@ -53,9 +53,9 @@ instead of library functions.
 
     struct Data { mapping(uint => bool) flags; }
     // Now we attach functions to the type.
-    // This is valid in the rest of the module.
+    // The attached functions can be used throughout the rest of the module.
     // If you import the module, you have to
-    // repeat the statement there, potentially as
+    // repeat the using directive there, for example as
     //   import "flags.sol" as Flags;
     //   using {Flags.insert, Flags.remove, Flags.contains}
     //     for Flags.Data;
