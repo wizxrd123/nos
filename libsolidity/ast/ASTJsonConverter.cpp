@@ -312,7 +312,7 @@ bool ASTJsonConverter::visit(InheritanceSpecifier const& _node)
 
 bool ASTJsonConverter::visit(UsingForDirective const& _node)
 {
-	std::vector<pair<string, Json::Value>> attributes = {
+	vector<pair<string, Json::Value>> attributes = {
 		make_pair("typeName", _node.typeName() ? toJson(*_node.typeName()) : Json::nullValue)
 	};
 	if (_node.usesBraces())

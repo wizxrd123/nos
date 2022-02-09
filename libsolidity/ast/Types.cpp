@@ -347,9 +347,9 @@ MemberList::MemberMap Type::boundFunctions(Type const& _type, ASTNode const& _sc
 	if (auto refType = dynamic_cast<ReferenceType const*>(&_type))
 		typeLocation = refType->location();
 
-	set<pair<string, Declaration const*>> seenFunctions;
 	MemberList::MemberMap members;
 
+	set<pair<string, Declaration const*>> seenFunctions;
 	auto addFunction = [&](FunctionDefinition const& _function, optional<string> _name = {})
 	{
 		if (!_name)
