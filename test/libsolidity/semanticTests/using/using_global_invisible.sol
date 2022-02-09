@@ -27,7 +27,7 @@ import {T} from "A";
 import {C} from "B";
 
 contract D {
-    function te() public returns (uint) {
+    function test() public returns (uint) {
         C c = new C();
         // This tests that bound functions are available
         // even if the type is not available by name.
@@ -41,5 +41,5 @@ contract D {
 // compileViaYul: also
 // ----
 // library: "A":L
-// te() -> 3
+// test() -> 3
 // gas legacy: 130369
