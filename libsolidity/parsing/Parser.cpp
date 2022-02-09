@@ -970,17 +970,13 @@ ASTPointer<UsingForDirective> Parser::parseUsingDirective()
 	bool const usesBraces = m_scanner->currentToken() == Token::LBrace;
 	if (usesBraces)
 	{
-		vector<ASTPointer<IdentifierPath>> functionList;
-		advance();
-		while (true)
+		do
 		{
-			functionList.emplace_back(parseIdentifierPath());
-			if (m_scanner->currentToken() != Token::Comma)
-				break;
 			advance();
+			functions.emplace_back(parseIdentifierPath());
 		}
+		while (m_scanner->currentToken() == Token::Comma);
 		expectToken(Token::RBrace);
-		functions = move(functionList);
 	}
 	else
 		functions.emplace_back(parseIdentifierPath());
