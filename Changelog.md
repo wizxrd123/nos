@@ -7,7 +7,7 @@ Compiler Features:
 * JSON-AST: Added selector field for errors and events.
 
 Bugfixes:
-
+ * The compiler uses "C" instead of environment locale.
 
 ### 0.8.12 (2022-02-16)
 
