@@ -6,6 +6,7 @@ Language Features:
 
 Compiler Features:
 * JSON-AST: Added selector field for errors and events.
+ * Yul Optimizer: Improve inlining heauristics for via IR code generation and pure Yul compilation.
 
 Bugfixes:
 
