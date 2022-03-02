@@ -74,6 +74,7 @@ function bleeps_test
     sed -i 's/uint(-1)/type(uint).max/g' src/externals/WETH9.sol
     sed -i 's/msg\.sender\.transfer(/payable(msg.sender).transfer(/g' src/externals/WETH9.sol
     sed -i 's/^\s*\(Deposit\|Withdrawal\|Approval\|Transfer\)(/emit \1(/g' src/externals/WETH9.sol
+    find . -name "*.sol" -exec sed -i -e 's/^\(\s*\)\(assembly\)/\1\/\/\/ @solidity memory-safe-assembly\n\1\2/' '{}' \;
 
     # This test does not currently pass due to an upstream problem.
     # TODO: Remove this line when https://github.com/wighawag/bleeps/issues/2 is fixed

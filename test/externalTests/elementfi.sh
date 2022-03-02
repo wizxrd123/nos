@@ -89,6 +89,8 @@ function elementfi_test
     # TODO: Remove when https://github.com/element-fi/elf-contracts/issues/243 is fixed.
     sed -i 's|^\s*require(_expiration - block\.timestamp < _unitSeconds);\s*$||g' contracts/ConvergentCurvePool.sol
 
+    find . -name "*.sol" -exec sed -i -e 's/^\(\s*\)\(assembly\)/\1\/\/\/ @solidity memory-safe-assembly\n\1\2/' '{}' \;
+
     # Several tests fail unless we use the exact versions hard-coded in package-lock.json
     #neutralize_package_lock
 
