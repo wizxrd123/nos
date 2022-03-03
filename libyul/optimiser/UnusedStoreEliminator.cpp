@@ -264,47 +264,37 @@ bool UnusedStoreEliminator::knownUnrelated(
 		)
 			return true;
 
-		if (_op1.start && _op1.length && _op2.start)
+		u256 largeNumber = u256(1) << 255;
+		// Due to wrapping arithmetic, the below code can have "false positives".
+		// In the situation that the subtraction for computing "diff" wraps,
+		// we can return "unrelated" although the writes are actually related.
+		// In this case, 2.start and 1.start will both be >= largeNumber
+		// (see test/formal/redundant_store_unrelated.py).
+		// This means, both operations revert.
+		// Because of these false positives, this optimizer routine removes write operations
+		// where all subsequent read operations are unrelated or will revert due to high memory
+		// access. Since this second class of read operations will never return a value,
+		// it is irrelevant what value they return, so the write can be safely removed.
+
+		// 1.start + 1.length <= 2.start
+		if (_op1.length && _op2.start && _op1.start)
 		{
 			optional<u256> length1 = knowledge.valueIfKnownConstant(*_op1.length);
-			optional<u256> start1 = knowledge.valueIfKnownConstant(*_op1.start);
-			optional<u256> start2 = knowledge.valueIfKnownConstant(*_op2.start);
-			if (
-				(length1 && start1 && start2) &&
-				*start1 + *length1 >= *start1 && // no overflow
-				*start1 + *length1 <= *start2
-			)
-				return true;
+			optional<u256> diff = knowledge.differenceIfKnownConstant(*_op2.start, *_op1.start);
+			if (length1 && diff)
+				if (*length1 <= *diff && *diff <= largeNumber)
+					return true;
 		}
-		if (_op2.start && _op2.length && _op1.start)
+		// 2.start + 2.length <= 1.start
+		if (_op2.length && _op1.start && _op2.start)
 		{
 			optional<u256> length2 = knowledge.valueIfKnownConstant(*_op2.length);
-			optional<u256> start2 = knowledge.valueIfKnownConstant(*_op2.start);
-			optional<u256> start1 = knowledge.valueIfKnownConstant(*_op1.start);
-			if (
-				(length2 && start2 && start1) &&
-				*start2 + *length2 >= *start2 && // no overflow
-				*start2 + *length2 <= *start1
-			)
-				return true;
+			optional<u256> diff = knowledge.differenceIfKnownConstant(*_op1.start, *_op2.start);
+			// diff = 1.start - 2.start
+			if (length2 && diff)
+				if (*length2 <= *diff && *diff <= largeNumber)
+					return true;
 		}
-
-		if (_op1.start && _op1.length && _op2.start && _op2.length)
-		{
-			optional<u256> length1 = knowledge.valueIfKnownConstant(*_op1.length);
-			optional<u256> length2 = knowledge.valueIfKnownConstant(*_op2.length);
-			if (
-				(length1 && *length1 <= 32) &&
-				(length2 && *length2 <= 32) &&
-				knowledge.knownToBeDifferentByAtLeast32(*_op1.start, *_op2.start)
-			)
-				return true;
-		}
-
-		// TODO for more complicated memory overlap rules, we might need to
-		// impose a non-overflow assumption.
-		// We owuld want to cover things like
-		// op1.start + op1.length <= op2.start
 	}
 
 	return false;
