@@ -1,19 +1,21 @@
 {
+    let x := 5
     function f() {
         pop(create(0, 0, 0))
     }
-    sstore(5, 10)
+    sstore(x, 10)
     f()
-    sstore(5, 20)
+    sstore(x, 20)
 }
 // ----
 // step: unusedStoreEliminator
 //
 // {
 //     {
-//         sstore(5, 10)
+//         let x := 5
+//         sstore(x, 10)
 //         f()
-//         sstore(5, 20)
+//         sstore(x, 20)
 //     }
 //     function f()
 //     { pop(create(0, 0, 0)) }

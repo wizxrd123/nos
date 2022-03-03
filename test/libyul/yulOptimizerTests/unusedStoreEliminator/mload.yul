@@ -1,18 +1,20 @@
 {
-    mstore(0, 5)
-    let x := mload(0)
-    mstore(0, 8)
-    let y := mload(0)
-    sstore(0, y)
+    let zero := 0
+    mstore(zero, 5)
+    let x := mload(zero)
+    mstore(zero, 8)
+    let y := mload(zero)
+    sstore(zero, y)
 }
 // ----
 // step: unusedStoreEliminator
 //
 // {
 //     {
-//         mstore(0, 5)
-//         let x := mload(0)
-//         mstore(0, 8)
-//         sstore(0, mload(0))
+//         let zero := 0
+//         mstore(zero, 5)
+//         let x := mload(zero)
+//         mstore(zero, 8)
+//         sstore(zero, mload(zero))
 //     }
 // }
