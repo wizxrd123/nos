@@ -46,6 +46,14 @@ struct ApplyRule
 {
 };
 template <class Method>
+struct ApplyRule<Method, 5>
+{
+	static bool applyRule(AssemblyItems::const_iterator _in, std::back_insert_iterator<AssemblyItems> _out)
+	{
+		return Method::applySimple(_in[0], _in[1], _in[2], _in[3], _in[4], _out);
+	}
+};
+template <class Method>
 struct ApplyRule<Method, 4>
 {
 	static bool applyRule(AssemblyItems::const_iterator _in, std::back_insert_iterator<AssemblyItems> _out)
@@ -283,6 +291,38 @@ struct EqIsZeroJumpI: SimplePeepholeOptimizerMethod<EqIsZeroJumpI, 4>
 	}
 };
 
+// push_tag_1 jumpi push_tag_2 jump tag_1: -> iszero push_tag_2 jumpi tag_1:
+struct DoubleJump: SimplePeepholeOptimizerMethod<DoubleJump, 5>
+{
+	static size_t applySimple(
+		AssemblyItem const& _pushTag1,
+		AssemblyItem const& _jumpi,
+		AssemblyItem const& _pushTag2,
+		AssemblyItem const& _jump,
+		AssemblyItem const& _tag1,
+		std::back_insert_iterator<AssemblyItems> _out
+	)
+	{
+		if (
+			_pushTag1.type() == PushTag &&
+			_jumpi == Instruction::JUMPI &&
+			_pushTag2.type() == PushTag &&
+			_jump == Instruction::JUMP &&
+			_tag1.type() == Tag &&
+			_pushTag1.data() == _tag1.data()
+		)
+		{
+			*_out = AssemblyItem(Instruction::ISZERO, _jumpi.location());
+			*_out = _pushTag2;
+			*_out = _jumpi;
+			*_out = _tag1;
+			return true;
+		}
+		else
+			return false;
+	}
+};
+
 struct JumpToNext: SimplePeepholeOptimizerMethod<JumpToNext, 3>
 {
 	static size_t applySimple(
@@ -422,7 +462,7 @@ bool PeepholeOptimiser::optimise()
 		applyMethods(
 			state,
 			PushPop(), OpPop(), DoublePush(), DoubleSwap(), CommutativeSwap(), SwapComparison(),
-			DupSwap(), IsZeroIsZeroJumpI(), EqIsZeroJumpI(), JumpToNext(), UnreachableCode(),
+			DupSwap(), IsZeroIsZeroJumpI(), EqIsZeroJumpI(), DoubleJump(), JumpToNext(), UnreachableCode(),
 			TagConjunctions(), TruthyAnd(), Identity()
 		);
 	if (m_optimisedItems.size() < m_items.size() || (
