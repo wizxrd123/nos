@@ -13,7 +13,7 @@ contract c {
 // (): 1, 2, 3, 4, 5 ->
 // gas irOptimized: 155181
 // gas legacy: 155254
-// gas legacyOptimized: 155217
+// gas legacyOptimized: 155214
 // checkIfDataIsEmpty() -> false
 // sendMessage() -> true, 0x40, 0
 // checkIfDataIsEmpty() -> true

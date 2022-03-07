@@ -256,6 +256,33 @@ struct IsZeroIsZeroJumpI: SimplePeepholeOptimizerMethod<IsZeroIsZeroJumpI, 4>
 	}
 };
 
+struct EqIsZeroJumpI: SimplePeepholeOptimizerMethod<EqIsZeroJumpI, 4>
+{
+	static size_t applySimple(
+		AssemblyItem const& _eq,
+		AssemblyItem const& _iszero,
+		AssemblyItem const& _pushTag,
+		AssemblyItem const& _jumpi,
+		std::back_insert_iterator<AssemblyItems> _out
+	)
+	{
+		if (
+			_eq == Instruction::EQ &&
+			_iszero == Instruction::ISZERO &&
+			_pushTag.type() == PushTag &&
+			_jumpi == Instruction::JUMPI
+		)
+		{
+			*_out = AssemblyItem(Instruction::XOR, _eq.location());
+			*_out = _pushTag;
+			*_out = _jumpi;
+			return true;
+		}
+		else
+			return false;
+	}
+};
+
 struct JumpToNext: SimplePeepholeOptimizerMethod<JumpToNext, 3>
 {
 	static size_t applySimple(
@@ -395,7 +422,7 @@ bool PeepholeOptimiser::optimise()
 		applyMethods(
 			state,
 			PushPop(), OpPop(), DoublePush(), DoubleSwap(), CommutativeSwap(), SwapComparison(),
-			DupSwap(), IsZeroIsZeroJumpI(), JumpToNext(), UnreachableCode(),
+			DupSwap(), IsZeroIsZeroJumpI(), EqIsZeroJumpI(), JumpToNext(), UnreachableCode(),
 			TagConjunctions(), TruthyAnd(), Identity()
 		);
 	if (m_optimisedItems.size() < m_items.size() || (
