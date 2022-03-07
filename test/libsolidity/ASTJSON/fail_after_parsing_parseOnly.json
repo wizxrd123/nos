@@ -85,7 +85,7 @@
           {
             "id": 27,
             "nodeType": "Block",
-            "src": "85:74:1",
+            "src": "85:88:1",
             "statements":
             [
               {
@@ -137,19 +137,19 @@
                     "name": "E",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "src": "110:1:1",
+                    "src": "117:1:1",
                     "typeDescriptions": {}
                   },
                   "id": 18,
                   "names": [],
                   "nodeType": "FunctionCall",
-                  "src": "110:3:1",
+                  "src": "117:3:1",
                   "tryCall": false,
                   "typeDescriptions": {}
                 },
                 "id": 19,
                 "nodeType": "EmitStatement",
-                "src": "105:8:1"
+                "src": "112:8:1"
               },
               {
                 "expression":
@@ -158,21 +158,21 @@
                   "nodeType": "UnaryOperation",
                   "operator": "++",
                   "prefix": true,
-                  "src": "123:3:1",
+                  "src": "130:3:1",
                   "subExpression":
                   {
                     "id": 20,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "src": "125:1:1",
+                    "src": "132:1:1",
                     "typeDescriptions": {}
                   },
                   "typeDescriptions": {}
                 },
                 "id": 22,
                 "nodeType": "ExpressionStatement",
-                "src": "123:3:1"
+                "src": "130:3:1"
               },
               {
                 "assignments":
@@ -186,9 +186,9 @@
                     "id": 24,
                     "mutability": "mutable",
                     "name": "c",
-                    "nameLocation": "143:1:1",
+                    "nameLocation": "157:1:1",
                     "nodeType": "VariableDeclaration",
-                    "src": "129:15:1",
+                    "src": "143:15:1",
                     "stateVariable": false,
                     "storageLocation": "calldata",
                     "typeDescriptions": {},
@@ -197,7 +197,7 @@
                       "id": 23,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "129:4:1",
+                      "src": "143:4:1",
                       "typeDescriptions": {}
                     },
                     "visibility": "internal"
@@ -210,12 +210,12 @@
                   "id": 25,
                   "kind": "number",
                   "nodeType": "Literal",
-                  "src": "147:5:1",
+                  "src": "161:5:1",
                   "typeDescriptions": {},
                   "value": "123.4"
                 },
                 "nodeType": "VariableDeclarationStatement",
-                "src": "129:23:1"
+                "src": "143:23:1"
               }
             ]
           },
@@ -269,15 +269,15 @@
             "parameters": [],
             "src": "85:0:1"
           },
-          "src": "61:98:1",
+          "src": "61:112:1",
           "stateMutability": "nonpayable",
           "virtual": false,
           "visibility": "public"
         }
       ],
-      "src": "21:140:1",
+      "src": "21:154:1",
       "usedErrors": []
     }
   ],
-  "src": "0:162:1"
+  "src": "0:176:1"
 }

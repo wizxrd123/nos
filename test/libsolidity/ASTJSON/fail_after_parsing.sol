@@ -5,10 +5,10 @@ interface I {
 
     function f(E storage e) {
         error E;
-	emit E();
+        emit E();
 
         ++c;
-	uint calldata c = 123.4;
+        uint calldata c = 123.4;
     }
 }
 
